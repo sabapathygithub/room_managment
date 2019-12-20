@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="RoomManagementClient.Views.GuestEntry"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="5 0 5 0">
+            <TextBlock Height="25" Text="Guest Name"/>
+            <TextBox IsEnabled="{Binding IsEditable}" Text="{Binding GuestName}"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Margin="5 0 5 0">
+            <TextBlock Height="25" Text="Sex"/>
+            <ComboBox IsEnabled="{Binding IsEditable}" Width="80" ItemsSource="{Binding GenderList}" SelectedItem="{Binding Sex}"/>
+        </StackPanel>
+        <StackPanel  Grid.Column="2" Margin="5 0 5 0">
+            <TextBlock Height="25" Text="Age"/>
+            <TextBox IsEnabled="{Binding IsEditable}" Text="{Binding Age}"/>
+        </StackPanel>
+        <StackPanel  Grid.Column="3" Margin="5 0 5 0">
+            <TextBlock Height="25" Text="Check-In Date"/>
+            <DatePicker SelectedDate="{Binding CheckInDate}"/>
+        </StackPanel>
+        <StackPanel Grid.Column="4" Margin="5 0 5 0">
+            <TextBlock Height="25" Text="Check-Out Date"/>
+            <DatePicker SelectedDate="{Binding CheckOutDate}"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
