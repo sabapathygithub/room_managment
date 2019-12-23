@@ -17,12 +17,18 @@ namespace RoomManagementClient.ViewModels
 {
     public class RoomViewModel : BindableBase
     {
+        #region Fields
         private ObservableCollection<RoomModel> roomCollection = new ObservableCollection<RoomModel>();
         private RoomModel selectedRoom;
         private IEventAggregator ea;
         private ObservableCollection<string> locationCollection = new ObservableCollection<string>();
         private string selectedLocation;
+        private bool showErrorRegion;
+        private string errorMessage;
+        private DelegateCommand retryCommand;
+        #endregion
 
+        #region Properties
         public ObservableCollection<string> LocationCollection
         {
             get { return locationCollection; }
@@ -57,25 +63,25 @@ namespace RoomManagementClient.ViewModels
                     ea.GetEvent<RoomSelectedEvent>().Publish(selectedRoom);
             }
         }
-
-        private bool showErrorRegion;
+        
         public bool ShowErrorRegion
         {
             get { return showErrorRegion; }
             set { SetProperty(ref showErrorRegion, value); }
         }
-
-        private string errorMessage;
+        
         public string ErrorMessage
         {
             get { return errorMessage; }
             set { SetProperty(ref errorMessage, value); }
         }
 
-        private DelegateCommand retryCommand;
         public DelegateCommand RetryCommand =>
             retryCommand ?? (retryCommand = new DelegateCommand(OnInitialize));
 
+        #endregion
+
+        #region Methods
 
         public RoomViewModel(IEventAggregator ea)
         {
@@ -83,14 +89,13 @@ namespace RoomManagementClient.ViewModels
             OnInitialize();
         }
 
-        void OnInitialize()
+        async void OnInitialize()
         {
             ErrorMessage = string.Empty;
             ShowErrorRegion = false;
             try
             {
-                string url = "https://localhost:44392/api/";
-                string response = WebApiConsumer.ConsumeGetAsync("room");
+                string response = await WebApiConsumer.ConsumeGetAsync("room");
                 IEnumerable<RoomModel> locations = JsonConvert.DeserializeObject<IEnumerable<RoomModel>>(response);
                 foreach (var item in locations)
                 {
@@ -104,15 +109,18 @@ namespace RoomManagementClient.ViewModels
             }
         }
 
-        void GetRooms(string location)
+       async void GetRooms(string location)
         {
             roomCollection.Clear();
-            string response = WebApiConsumer.ConsumeGetAsync("room?location="+location);
+            string response = await WebApiConsumer.ConsumeGetAsync("room?location=" + location);
             IEnumerable<RoomModel> rooms = JsonConvert.DeserializeObject<IEnumerable<RoomModel>>(response);
             foreach (var item in rooms)
             {
                 roomCollection.Add(item);                
             }
+            SelectedRoom = roomCollection.FirstOrDefault();
         }
+
+        #endregion
     }
 }

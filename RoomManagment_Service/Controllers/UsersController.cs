@@ -15,7 +15,9 @@ namespace RoomManagment_Service.Controllers
 {
     public class UsersController : ApiController
     {
-        // GET: api/Users
+        /// <summary>
+        /// Gets the collection of user.
+        /// </summary>
         public IHttpActionResult GetUsers()
         {
             IEnumerable<UserModel> users = null;
@@ -33,6 +35,11 @@ namespace RoomManagment_Service.Controllers
             return Ok(users);
         }
 
+        /// <summary>
+        /// Saves the user value into db context.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         [ResponseType(typeof(User))]
         public IHttpActionResult PostUser(UserModel user)
         {

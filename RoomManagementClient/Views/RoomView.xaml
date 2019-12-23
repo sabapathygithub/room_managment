@@ -12,9 +12,10 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:BoolToColorConverter x:Key="BoolToBrush"/>
         
         <DataTemplate x:Key="RoomDataTemplate">
-            <Border Margin="2" BorderBrush="Green" BorderThickness="1">
+            <Border Margin="2" BorderBrush="Green" Background="{Binding Status,Converter={StaticResource BoolToBrush}}" BorderThickness="1">
                 <Grid Margin="5" Width="200" Height="120">
                     <Grid.RowDefinitions>
                         <RowDefinition />
@@ -31,10 +32,9 @@
                             <RowDefinition/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <TextBlock Text="{Binding Capacity}" Grid.RowSpan="2" FontSize="20"/>
+                        <TextBlock Text="{Binding Capacity}" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.RowSpan="2" FontSize="20"/>
                         <TextBlock Grid.Column="1" Text="{Binding Address}" TextWrapping="Wrap"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Location}"/>
-                        <TextBlock Grid.Row="1" Text="{Binding Status}"/>
                     </Grid>
                 </Grid>
             </Border>

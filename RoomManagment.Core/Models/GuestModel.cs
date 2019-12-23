@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace RoomManagment.Core.Models
 {
+    /// <summary>
+    /// Holds the properties of guest entity.
+    /// </summary>
     public class GuestModel
     {
         public long GuestId { get; set; }
@@ -14,8 +17,8 @@ namespace RoomManagment.Core.Models
         public int Age { get; set; }
         public long RoomId { get; set; }
 
-        public Nullable<DateTime> CheckInDate { get; set; }
+        public DateTime? CheckInDate { get; set; }
 
-        public Nullable<DateTime> CheckOutDate { get; set; }
+        public DateTime? CheckOutDate { get; set; }
     }
 }

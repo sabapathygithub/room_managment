@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace RoomManagment.Core.Models
 {
+    /// <summary>
+    /// Holds the properties of user entity.
+    /// </summary>
     public class UserModel
     {
         public long UserId { get; set; }

@@ -5,69 +5,103 @@ using Prism.Regions;
 using RoomManagementClient.Helpers;
 using RoomManagment.Core.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace RoomManagementClient.ViewModels
 {
     public class LoginViewModel : BindableBase
     {
+        #region Fields
         IRegionManager regionManager;
+        private string loginUserName;
+        private string loginPassword;
+        private string username;
+        private string registrationLogin;
+        private string registrationPassword;
+        private string confirmPassword;
+        private DelegateCommand cancelCommand;
+        private DelegateCommand loginCommand;
+        private DelegateCommand registrationCommand;
+        #endregion
+
+        #region Constructor
 
         public LoginViewModel(IRegionManager regionManager)
         {
             this.regionManager = regionManager;
         }
-        private string loginUserName;
-        private string loginPassword;
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// Gets or sets the login user name.
+        /// </summary>
         public string LoginUserName
         {
             get { return loginUserName; }
             set { SetProperty(ref loginUserName, value); }
         }
-        
+
+        /// <summary>
+        /// Gets or sets the login password.
+        /// </summary>
         public string LoginPassword
         {
             get { return loginPassword; }
             set { SetProperty(ref loginPassword, value); }
         }
 
-        private string username;
+        /// <summary>
+        /// Gets or sets the user name for registration.
+        /// </summary>
         public string Username
         {
             get { return username; }
             set { SetProperty(ref username, value); }
         }
 
-        private string registrationLogin;
+        /// <summary>
+        /// Gets or sets the registration login.
+        /// </summary>
         public string RegistrationLogin
         {
             get { return registrationLogin; }
             set { SetProperty(ref registrationLogin, value); }
         }
 
-        private string registrationPassword;
+        /// <summary>
+        /// Gets or sets the password during registration.
+        /// </summary>
         public string RegistrationPassword
         {
             get { return registrationPassword; }
             set { SetProperty(ref registrationPassword, value); }
         }
 
-        private string confirmPassword;
+        /// <summary>
+        /// Gets or sets the confirm password.
+        /// </summary>
         public string ConfirmPassword
         {
             get { return confirmPassword; }
             set { SetProperty(ref confirmPassword, value); }
         }
+        #endregion
 
+        #region Command
 
-
-        private DelegateCommand cancelCommand;
         public DelegateCommand CancelCommand =>
             cancelCommand ?? (cancelCommand = new DelegateCommand(ExecuteCancelCommand));
+
+        public DelegateCommand LoginCommand =>
+            loginCommand ?? (loginCommand = new DelegateCommand(ExecuteLoginCommand));
+
+        public DelegateCommand RegistrationCommand =>
+            registrationCommand ?? (registrationCommand = new DelegateCommand(ExecuteRegistrationCommand));
+
+        #endregion
+
+        #region Methods
 
         void ExecuteCancelCommand()
         {
@@ -75,11 +109,7 @@ namespace RoomManagementClient.ViewModels
             ClearRegistraton();
         }
 
-        private DelegateCommand loginCommand;
-        public DelegateCommand LoginCommand =>
-            loginCommand ?? (loginCommand = new DelegateCommand(ExecuteLoginCommand));
-
-        void ExecuteLoginCommand()
+        async void ExecuteLoginCommand()
         {
             UserModel userModel = new UserModel
             {
@@ -88,14 +118,14 @@ namespace RoomManagementClient.ViewModels
             };
             try
             {
-                string response = WebApiConsumer.ConsumePostAsJsonAsync("login", userModel);
+                string response = await WebApiConsumer.ConsumePostAsJsonAsync("login", userModel);
                 if (!string.IsNullOrEmpty(response))
                 {
                     UserModel user = JsonConvert.DeserializeObject<UserModel>(response);
                     CurrentUserHelper.Instance.SetUserDetails(user);
                     var currentRegion = regionManager.Regions["LoginViewRegion"];
                     if (currentRegion != null)
-                    {                        
+                    {
                         currentRegion.RequestNavigate(new Uri("Dashboard", UriKind.Relative));
                     }
                     ClearLogin();
@@ -109,13 +139,9 @@ namespace RoomManagementClient.ViewModels
 
         }
 
-        private DelegateCommand registrationCommand;
-        public DelegateCommand RegistrationCommand =>
-            registrationCommand ?? (registrationCommand = new DelegateCommand(ExecuteRegistrationCommand));
-
-        void ExecuteRegistrationCommand()
+       async  void ExecuteRegistrationCommand()
         {
-            if(RegistrationPassword != ConfirmPassword)
+            if (RegistrationPassword != ConfirmPassword)
             {
                 MessageBox.Show("Password and confirmation password do not match.");
                 return;
@@ -124,11 +150,11 @@ namespace RoomManagementClient.ViewModels
             {
                 Login = RegistrationLogin,
                 Password = RegistrationPassword,
-                UserName = Username                
+                UserName = Username
             };
             try
             {
-                string response = WebApiConsumer.ConsumePostAsJsonAsync("users", userModel);
+                string response = await WebApiConsumer.ConsumePostAsJsonAsync("users", userModel);
                 if (!string.IsNullOrEmpty(response))
                 {
                     UserModel user = JsonConvert.DeserializeObject<UserModel>(response);
@@ -137,7 +163,7 @@ namespace RoomManagementClient.ViewModels
                     var currentRegion = regionManager.Regions["LoginViewRegion"];
                     if (currentRegion != null)
                     {
-                        currentRegion.RequestNavigate(new Uri("Dashboard", UriKind.Relative)); 
+                        currentRegion.RequestNavigate(new Uri("Dashboard", UriKind.Relative));
                     }
                 }
             }
@@ -161,5 +187,7 @@ namespace RoomManagementClient.ViewModels
             LoginUserName = string.Empty;
             LoginPassword = string.Empty;
         }
+
+        #endregion
     }
 }

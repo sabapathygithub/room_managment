@@ -11,7 +11,11 @@ namespace RoomManagment_Service.Controllers
 {
     public class RoomController : ApiController
     {
-        // GET api/values
+        
+        /// <summary>
+        /// Get room collection from database context.
+        /// </summary>
+        /// <returns>Room collection as Action Result.</returns>
         public IHttpActionResult GetRoom()
         {
             IEnumerable<RoomModel> rooms = null;
@@ -24,7 +28,7 @@ namespace RoomManagment_Service.Controllers
                     Location = s.Location,
                     RoomId = s.RoomId,
                     RoomName = s.RoomName,
-                    Status = s.Status.HasValue ? s.Status.Value : false
+                    Status = dbContext.Guests.Count(j => j.RoomId == s.RoomId) < (s.Capacity.HasValue ? s.Capacity.Value : 0)
 
                 }).ToList<RoomModel>();
                 
@@ -32,7 +36,11 @@ namespace RoomManagment_Service.Controllers
             return Ok(rooms);
         }
 
-        // GET api/values/5
+        /// <summary>
+        /// Get room collection based on location.
+        /// </summary>
+        /// <param name="location">selected location in ui.</param>
+        /// <returns>Room collection as Action Result.</returns>
         public IHttpActionResult GetRoom(string location)
         {
             IEnumerable<RoomModel> rooms = null;
@@ -46,22 +54,24 @@ namespace RoomManagment_Service.Controllers
                     Location = s.Location,
                     RoomId = s.RoomId,
                     RoomName = s.RoomName,
-                    Status = s.Status.HasValue ? s.Status.Value : false
+                    Status = dbContext.Guests.Count(j => j.RoomId == s.RoomId && j.CheckOutDate > DateTime.Now) < (s.Capacity.HasValue ? s.Capacity.Value : 0)
 
                 }).ToList<RoomModel>();
             }
             return Ok(rooms);
         }
 
-        // POST api/values
+        /// <summary>
+        /// Inserts the room details into the db context.
+        /// </summary>
         public IHttpActionResult PostRoom(RoomModel value)
         {
             if (!ModelState.IsValid)
                 return BadRequest("Not a valid data.");
 
-            using(var dbContenxt = new Room_ManagmentEntities())
+            using(var dbContext = new Room_ManagmentEntities())
             {
-                dbContenxt.Rooms.Add(new Room
+                dbContext.Rooms.Add(new Room
                 {
                     Address = value.Address,
                     Capacity = value.Capacity,
@@ -69,12 +79,17 @@ namespace RoomManagment_Service.Controllers
                     RoomName = value.RoomName,
                     Status = true
                 });
-                dbContenxt.SaveChanges();
+                dbContext.SaveChanges();
             }
             return Ok();
         }
 
-        // PUT api/values/5
+        /// <summary>
+        /// Updates the incoming room details in db context.
+        /// </summary>
+        /// <param name="id">Identity value of the room to be updated in db context.</param>
+        /// <param name="value">Room details to be updated.</param>
+        /// <returns>Http Action Result</returns>
         public IHttpActionResult PutRoom(int id, RoomModel value)
         {
             if (id <= 0)
@@ -95,7 +110,11 @@ namespace RoomManagment_Service.Controllers
             return Ok();
         }
 
-        // DELETE api/values/5
+        /// <summary>
+        /// Deletes the room based on incoming id.
+        /// </summary>
+        /// <param name="id">Identity value of the room to be deleted in db context.</param>
+        /// <returns>Http Action Result</returns>
         public IHttpActionResult DeleteRoom(int id)
         {
             if (id <= 0)

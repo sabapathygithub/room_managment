@@ -11,7 +11,11 @@ namespace RoomManagment_Service.Controllers
 {
     public class LoginController : ApiController
     {
-
+        /// <summary>
+        /// Verifies the incoming user is valid or not and then, returns appropriate user if it is valid.
+        /// </summary>
+        /// <param name="user">Logged-in user.</param>
+        /// <returns>Returns valid user if the details are matches.</returns>
         [ResponseType(typeof(User))]
         public IHttpActionResult PostLogin(UserModel user)
         {

@@ -10,7 +10,10 @@ namespace RoomManagment_Service.Controllers
 {
     public class GuestController : ApiController
     {
-        // GET api/values
+        /// <summary>
+        /// Gets the collection of guest from database context.
+        /// </summary>
+        /// <returns>Collection of guest as action result.</returns>
         public IHttpActionResult GetGuest()
         {
             IEnumerable<GuestModel> guests = null;
@@ -31,7 +34,11 @@ namespace RoomManagment_Service.Controllers
             return Ok(guests);
         }
 
-        // GET api/values/5
+        /// <summary>
+        /// Gets the collection of guest based on incoming room id.
+        /// </summary>
+        /// <param name="id">Room Identity</param>
+        /// <returns>Collection of guest as action result.</returns>
         public IHttpActionResult GetGuest(int id)
         {
             IEnumerable<GuestModel> guests = null;
@@ -43,7 +50,7 @@ namespace RoomManagment_Service.Controllers
                 var guest = dbContext.Guests.Where(i => i.RoomId == id);
                 if (guest != null)
                 {
-                    guests = guest.Select(s=> new GuestModel
+                    guests = guest.Where(i => i.CheckOutDate > DateTime.Now).Select(s=> new GuestModel
                     {
                         Age = s.Age.HasValue ? s.Age.Value : 0,
                         GuestId = s.GuestId,
@@ -62,7 +69,11 @@ namespace RoomManagment_Service.Controllers
             return Ok(guests);
         }
 
-        // POST api/values
+        /// <summary>
+        /// Saves the guest collection into db context.
+        /// </summary>
+        /// <param name="value">Guest collection from UI</param>
+        /// <returns>Action result.</returns>
         public IHttpActionResult PostGuest(IEnumerable<GuestModel> value)
         {
             if (!ModelState.IsValid)
@@ -87,7 +98,9 @@ namespace RoomManagment_Service.Controllers
             return Ok();
         }
 
-        // PUT api/values/5
+        /// <summary>
+        /// Updates the incoming guest value based on identity value.
+        /// </summary>
         public IHttpActionResult PutGuest(int id, GuestModel value)
         {
             if (id <= 0)
@@ -107,7 +120,9 @@ namespace RoomManagment_Service.Controllers
             return Ok();
         }
 
-        // DELETE api/values/5
+        /// <summary>
+        /// Deletes the guest value based on identity value.
+        /// </summary>
         public IHttpActionResult DeleteGuest(int id)
         {
             if (id <= 0)

@@ -71,7 +71,7 @@ namespace RoomManagementClient.ViewModels
             ClearFields();
         }
 
-        void ExecuteSaveCommand()
+        async void ExecuteSaveCommand()
         {
             RoomModel roomModel = new RoomModel
             {
@@ -82,7 +82,7 @@ namespace RoomManagementClient.ViewModels
             };
             try
             {
-                string response = WebApiConsumer.ConsumePostAsJsonAsync("room", roomModel);
+                string response = await WebApiConsumer.ConsumePostAsJsonAsync("room", roomModel);
                 
             }
             catch(Exception)

@@ -1,9 +1,4 @@
 ﻿using RoomManagment.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RoomManagementClient.Helpers
 {
@@ -28,17 +23,17 @@ namespace RoomManagementClient.Helpers
         public long UserId { get; private set; }
 
         /// <summary>
-        /// Gets the instance of the singleton class
+        /// Gets the instance of the CurrentUserHelper in singleton pattern.
         /// </summary>
         public static CurrentUserHelper Instance
         {
             get
             {
-                if(userHelper == null)
+                if (userHelper == null)
                 {
-                    lock(padlock)
+                    lock (padlock)
                     {
-                        if(userHelper == null)
+                        if (userHelper == null)
                         {
                             userHelper = new CurrentUserHelper();
                         }

@@ -14,34 +14,57 @@ using System.Windows;
 
 namespace RoomManagementClient.ViewModels
 {
-    public class GuestViewModel :BindableBase
+    public class GuestViewModel : BindableBase
     {
-
+        #region Fields
+        private ObservableCollection<GuestEntryViewModel> guestCollection = new ObservableCollection<GuestEntryViewModel>();
         private RoomModel selectedRoom;
+        private string roomName;
+        private string location;        
+        private bool showErrorRegion;
+        private string errorMessage;
+        private bool showGuestList;
+        private DelegateCommand retryCommand;
+        private DelegateCommand addGuestCommand;
+        private DelegateCommand saveGuestCommand;
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// Gets or sets a value which indicates the selected room.
+        /// </summary>
         public RoomModel SelectedRoom
         {
             get { return selectedRoom; }
-            set { SetProperty(ref selectedRoom, value);
+            set
+            {
+                SetProperty(ref selectedRoom, value);
                 if (AddGuestCommand != null)
                     AddGuestCommand.RaiseCanExecuteChanged();
             }
         }
-        private string roomName;
 
+        /// <summary>
+        /// Gets or sets a string value which indicates the room name.
+        /// </summary>
         public string RoomName
         {
             get { return roomName; }
             set { SetProperty(ref roomName, value); }
         }
 
-        private string location;
+        /// <summary>
+        /// Gets or sets a string value which indicates the location.
+        /// </summary>
         public string Location
         {
             get { return location; }
             set { SetProperty(ref location, value); }
         }
 
-        private ObservableCollection<GuestEntryViewModel> guestCollection = new ObservableCollection<GuestEntryViewModel>();
+        /// <summary>
+        /// Gets or sets the collection of guest which entered in the UI.
+        /// </summary>
         public ObservableCollection<GuestEntryViewModel> GuestCollection
         {
             get { return guestCollection; }
@@ -51,52 +74,74 @@ namespace RoomManagementClient.ViewModels
             }
         }
 
-
-        private bool showErrorRegion;
+        /// <summary>
+        /// Gets or sets a boolean value which indicates whether to show/hide the error details.
+        /// </summary>
         public bool ShowErrorRegion
         {
             get { return showErrorRegion; }
             set { SetProperty(ref showErrorRegion, value); }
         }
 
-        private string errorMessage;
+        /// <summary>
+        /// Gets or sets a string value which indicates the error message.
+        /// </summary>
         public string ErrorMessage
         {
             get { return errorMessage; }
             set { SetProperty(ref errorMessage, value); }
         }
 
-        private bool showGuestList;
+        /// <summary>
+        /// Gets or sets a boolean value which indicates whether to show guest list or not.
+        /// </summary>
         public bool ShowGuestList
         {
             get { return showGuestList; }
             set { SetProperty(ref showGuestList, value); }
         }
 
-        private DelegateCommand retryCommand;
+        #endregion
+
+        #region Commands
         public DelegateCommand RetryCommand =>
             retryCommand ?? (retryCommand = new DelegateCommand(GetGuestCollection));
 
-        private DelegateCommand addGuestCommand;
+        
         public DelegateCommand AddGuestCommand =>
             addGuestCommand ?? (addGuestCommand = new DelegateCommand(ExecuteAddGuestCommand, CanExecuteAddGuestCommand));
 
-        void ExecuteAddGuestCommand()
+        
+        public DelegateCommand SaveGuestCommand =>
+            saveGuestCommand ?? (saveGuestCommand = new DelegateCommand(ExecuteSaveGuestCommand));
+
+        #endregion
+
+        #region Methods
+
+        public GuestViewModel(IEventAggregator ea)
+        {
+            ea.GetEvent<RoomSelectedEvent>().Unsubscribe(RoomSelectionChanged);
+            ea.GetEvent<RoomSelectedEvent>().Subscribe(RoomSelectionChanged);
+        }
+
+        /// <summary>
+        /// Called when AddGuest command is executed.
+        /// </summary>
+        private void ExecuteAddGuestCommand()
         {
             guestCollection.Add(new GuestEntryViewModel());
             ShowGuestList = guestCollection.Count > 0;
         }
 
-        bool CanExecuteAddGuestCommand()
-        {            
+        //Provides confirmation to AddGuest command whether to execute it or not.
+        private bool CanExecuteAddGuestCommand()
+        {
             return SelectedRoom != null && !(SelectedRoom.Capacity > 0 && guestCollection.Count == SelectedRoom.Capacity);
         }
 
-        private DelegateCommand saveGuestCommand;
-        public DelegateCommand SaveGuestCommand =>
-            saveGuestCommand ?? (saveGuestCommand = new DelegateCommand(ExecuteSaveGuestCommand));
-
-        void ExecuteSaveGuestCommand()
+        //Called when the SaveGuest command is executed,
+        private void ExecuteSaveGuestCommand()
         {
             try
             {
@@ -122,17 +167,12 @@ namespace RoomManagementClient.ViewModels
             }
         }
 
-        public GuestViewModel(IEventAggregator ea)
-        {
-            ea.GetEvent<RoomSelectedEvent>().Unsubscribe(RoomSelectionChanged);
-            ea.GetEvent<RoomSelectedEvent>().Subscribe(RoomSelectionChanged);
-        }
-
+        //Called when the room selection is changed.
         private void RoomSelectionChanged(RoomModel obj)
         {
             guestCollection.Clear();
             ShowGuestList = false;
-            if(obj != null)
+            if (obj != null)
             {
                 SelectedRoom = obj;
                 RoomName = obj.RoomName;
@@ -141,7 +181,9 @@ namespace RoomManagementClient.ViewModels
             }
         }
 
-        private void GetGuestCollection()
+
+        // Calls the web api and gets the guest collection based on selected room.
+        private async void GetGuestCollection()
         {
             if (SelectedRoom == null)
                 return;
@@ -149,46 +191,31 @@ namespace RoomManagementClient.ViewModels
             ShowErrorRegion = false;
             try
             {
-                string url = "https://localhost:44392/api/";
-                using (HttpClient client = new HttpClient())
+                string navigateUrl = "guest?id=" + SelectedRoom.RoomId;
+                string response = await WebApiConsumer.ConsumeGetAsync(navigateUrl);
+                IEnumerable<GuestModel> rooms = JsonConvert.DeserializeObject<IEnumerable<GuestModel>>(response);
+                foreach (var item in rooms)
                 {
-                    client.BaseAddress = new Uri(url);
-                    var responseTask = client.GetAsync("guest?id=" + SelectedRoom.RoomId);
-                    responseTask.Wait();
-
-                    var result = responseTask.Result;
-                    if (result.IsSuccessStatusCode)
+                    guestCollection.Add(new GuestEntryViewModel
                     {
-
-                        var readTask = result.Content.ReadAsStringAsync();
-                        readTask.Wait();
-
-                        var response = readTask.Result;
-                        IEnumerable<GuestModel> rooms = JsonConvert.DeserializeObject<IEnumerable<GuestModel>>(response);
-                        foreach (var item in rooms)
-                        {
-                            guestCollection.Add(new GuestEntryViewModel
-                            {
-                                Age = item.Age,
-                                CheckInDate = item.CheckInDate,
-                                CheckOutDate = item.CheckOutDate,
-                                GuestName = item.GuestName,
-                                Sex = item.Sex,
-                                GuestId = item.GuestId,
-                                RoomId = item.RoomId,
-                                IsEditable = false
-                            });
-                        }
-                        ShowGuestList = guestCollection.Count > 0;
-                    }
+                        Age = item.Age,
+                        CheckInDate = item.CheckInDate,
+                        CheckOutDate = item.CheckOutDate,
+                        GuestName = item.GuestName,
+                        Sex = item.Sex,
+                        GuestId = item.GuestId,
+                        RoomId = item.RoomId,
+                        IsEditable = false
+                    });
                 }
+                ShowGuestList = guestCollection.Count > 0;
             }
             catch (Exception)
             {
                 ErrorMessage = "Error while fetching data. Retry Again!.";
                 ShowErrorRegion = true;
             }
-           
         }
+        #endregion
     }
 }

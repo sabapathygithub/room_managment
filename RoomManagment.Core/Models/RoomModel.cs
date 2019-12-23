@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace RoomManagment.Core
 {
+    /// <summary>
+    /// Holds the properties of room entity.
+    /// </summary>
     public class RoomModel
     {
         public long RoomId { get; set; }

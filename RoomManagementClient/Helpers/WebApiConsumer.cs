@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -9,25 +10,18 @@ namespace RoomManagementClient.Helpers
 {
     public class WebApiConsumer
     {
-        public static string ConsumePostAsJsonAsync(string navigateurl, object postObject)
+        static string webApiUrl = ConfigurationManager.AppSettings["WebApiUrl"];
+        public async static Task<string> ConsumePostAsJsonAsync(string navigateurl, object postObject)
         {
-            string url = "https://localhost:44392/api/";
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    client.BaseAddress = new Uri(url);
-                    var responseTask = client.PostAsJsonAsync(navigateurl, postObject);
-                    responseTask.Wait();
-
-                    var result = responseTask.Result;
-                    if (result.IsSuccessStatusCode)
+                    client.BaseAddress = new Uri(webApiUrl);
+                    var responseTask = await client.PostAsJsonAsync(navigateurl, postObject);                                       
+                    if (responseTask.IsSuccessStatusCode)
                     {
-
-                        var readTask = result.Content.ReadAsStringAsync();
-                        readTask.Wait();
-
-                        var response = readTask.Result;
+                        var response = await responseTask.Content.ReadAsStringAsync();
                         return response;
                     }
                     return "Execution is failed";
@@ -39,25 +33,17 @@ namespace RoomManagementClient.Helpers
             }
         }
 
-        public static string ConsumeGetAsync(string navigateuri)
+        public async static Task<string> ConsumeGetAsync(string navigateuri)
         {
-            string url = "https://localhost:44392/api/";
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    client.BaseAddress = new Uri(url);
-                    var responseTask = client.GetAsync(navigateuri);
-                    responseTask.Wait();
-
-                    var result = responseTask.Result;
-                    if (result.IsSuccessStatusCode)
+                    client.BaseAddress = new Uri(webApiUrl);
+                    var responseTask = await client.GetAsync(navigateuri);
+                    if (responseTask.IsSuccessStatusCode)
                     {
-
-                        var readTask = result.Content.ReadAsStringAsync();
-                        readTask.Wait();
-
-                        var response = readTask.Result;
+                        var response = await responseTask.Content.ReadAsStringAsync();                      
                         return response;
                     }
                     return "Execution is failed";
